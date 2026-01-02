@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNI-BANK</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Авторизация */
+        .auth-screen {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-owner {
+            background: #ec4899;
+        }
+
+        .btn-owner:hover {
+            background: #db2777;
+        }
+
+        /* Основное приложение */
+        .main-app {
+            display: none;
+        }
+
+        .main-app.active {
+            display: block;
+        }
+
+        /* Верхняя панель */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .user-avatar.owner {
+            background: #ec4899;
+            position: relative;
+        }
+
+        .user-avatar.owner::after {
+            content: '👑';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Панель владельца */
+        .owner-panel {
+            background: rgba(236, 72, 153, 0.1);
+            border: 2px solid #ec4899;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .owner-title {
+            color: #ec4899;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .owner-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .owner-action {
+            background: rgba(236, 72, 153, 0.2);
+            border: 1px solid #ec4899;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .owner-action:hover {
+            background: rgba(236, 72, 153, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .owner-action i {
+            font-size: 24px;
+            color: #ec4899;
+            margin-bottom: 10px;
+        }
+
+        /* Карточки */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* Быстрые действия */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .action-btn i {
+            font-size: 22px;
+            color: #3b82f6;
+        }
+
+        /* Навигация */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            opacity: 0.7;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            color: #3b82f6;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+
+        /* Секции */
+        .section {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Криптовалюта */
+        .crypto-list {
+            margin-top: 20px;
+        }
+
+        .crypto-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crypto-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .crypto-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .crypto-price {
+            text-align: right;
+        }
+
+        .price-arrow {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+
+        .price-up {
+            color: #10b981;
+        }
+
+        .price-down {
+            color: #ef4444;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s;
+            display: none;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Модальные окна */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .close-modal:hover {
+            opacity: 1;
+        }
+
+        /* Списки пользователей */
+        .users-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .user-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-item-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .user-item-balance {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Портфолио крипты */
+        .portfolio-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .portfolio-amount {
+            font-weight: bold;
+            color: #f59e0b;
+        }
+
+        .portfolio-value {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Авторизация -->
+    <div id="authScreen" class="auth-screen">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 42px; margin-bottom: 10px;">🏦</div>
+            <h1 style="font-size: 32px; margin-bottom: 10px;">UNI-BANK</h1>
+            <p style="opacity: 0.8;">Универсальный банковский симулятор</p>
+        </div>
+
+        <div class="auth-tabs">
+            <div class="auth-tab active" onclick="showAuthForm('login')">Вход</div>
+            <div class="auth-tab" onclick="showAuthForm('register')">Регистрация</div>
+        </div>
+
+        <!-- Форма входа -->
+        <div id="loginForm" class="auth-form active">
+            <div class="form-group">
+                <input type="text" id="loginUsername" placeholder="Логин">
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="Пароль">
+            </div>
+            <button class="btn" onclick="login()">Войти</button>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div id="registerForm" class="auth-form">
+            <div class="form-group">
+                <input type="text" id="regUsername" placeholder="Логин (от 3 символов)">
+            </div>
+            <div class="form-group">
+                <input type="text" id="regName" placeholder="Ваше имя">
+            </div>
+            <div class="form-group">
+                <input type="password" id="regPassword" placeholder="Пароль (от 4 символов)">
+            </div>
+            <button class="btn btn-success" onclick="register()">Зарегистрироваться</button>
+        </div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="mainApp" class="main-app container">
+        <!-- Верхняя панель -->
+        <div class="top-bar">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+                UNI-BANK
+            </div>
+            <div class="user-menu">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+                <div class="user-avatar" id="userAvatar">U</div>
+            </div>
+        </div>
+
+        <!-- Панель владельца -->
+        <div id="ownerPanel" class="owner-panel">
+            <div class="owner-title">
+                <i class="fas fa-crown"></i>
+                Панель владельца
+            </div>
+            <div class="owner-actions">
+                <div class="owner-action" onclick="openModal('giveMoneyModal')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <div>Выдать деньги</div>
+                </div>
+                <div class="owner-action" onclick="openModal('viewUsersModal')">
+                    <i class="fas fa-users"></i>
+                    <div>Все пользователи</div>
+                </div>
+                <div class="owner-action" onclick="addMoneyToSelf()">
+                    <i class="fas fa-coins"></i>
+                    <div>Взять деньги</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной баланс -->
+        <div class="card balance-card">
+            <div style="font-size: 14px; opacity: 0.9;">Общий баланс</div>
+            <div class="balance-amount" id="totalBalance">0 ₽</div>
+            <div style="margin-top: 10px; font-size: 14px;">
+                <span id="balanceUSD">$0</span> • 
+                <span id="balanceCrypto">0 UNC</span>
+            </div>
+        </div>
+
+        <!-- Быстрые действия -->
+        <div class="quick-actions">
+            <button class="action-btn" onclick="switchSection('transfers')">
+                <i class="fas fa-exchange-alt"></i>
+                Переводы
+            </button>
+            <button class="action-btn" onclick="switchSection('cards')">
+                <i class="fas fa-credit-card"></i>
+                Карты
+            </button>
+            <button class="action-btn" onclick="switchSection('clicker')">
+                <i class="fas fa-coins"></i>
+                Заработок
+            </button>
+            <button class="action-btn" onclick="switchSection('crypto')">
+                <i class="fas fa-chart-line"></i>
+                Крипта
+            </button>
+        </div>
+
+        <!-- Секция Главная -->
+        <div id="dashboard" class="section active">
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-history"></i> Последние операции</h3>
+                <div id="recentTransactions">
+                    <p style="text-align: center; opacity: 0.7; padding: 20px;">Нет операций</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция Переводы -->
+        <div id="transfers" class="section">
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-exchange-alt"></i> Новый перевод</h3>
+                <div class="form-group">
+                    <input type="text" id="transferToUser" placeholder="Логин получателя">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="transferAmount" placeholder="Сумма (₽)" min="1">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="transferComment" placeholder="Комментарий (необязательно)">
+                </div>
+                <button class="btn" onclick="makeTransfer()">
+                    <i class="fas fa-paper-plane"></i> Отправить перевод
+                </button>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-history"></i> История переводов</h3>
+                <div id="transferHistory">
+                    <p style="text-align: center; opacity: 0.7; padding: 20px;">Нет переводов</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция Карты -->
+        <div id="cards" class="section">
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-credit-card"></i> Ваши карты</h3>
+                <button class="btn" onclick="generateNewCard()" style="margin-bottom: 20px;">
+                    <i class="fas fa-plus"></i> Выпустить новую карту
+                </button>
+                <div id="cardsList">
+                    <!-- Карты загружаются через JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция Кликер -->
+        <div id="clicker" class="section">
+            <div class="card">
+                <div style="text-align: center; padding: 30px 0;">
+                    <h2 style="margin-bottom: 10px;"><i class="fas fa-coins"></i> Зарабатывайте кликами!</h2>
+                    <p style="opacity: 0.8; margin-bottom: 20px;">Нажмите на кнопку, чтобы получить деньги</p>
+                    
+                    <button class="clicker-btn" id="clickerButton" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                        <i class="fas fa-coins" style="font-size: 50px;"></i>
+                        <span id="clickValue">+1 ₽</span>
+                    </button>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px;">
+                        <div class="card">
+                            <div style="font-size: 14px; opacity: 0.8;">Всего кликов</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="totalClicks">0</div>
+                        </div>
+                        <div class="card">
+                            <div style="font-size: 14px; opacity: 0.8;">Заработано</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="clickerEarned">0 ₽</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция Крипта -->
+        <div id="crypto" class="section">
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-chart-line"></i> Криптовалютный рынок</h3>
+                <div id="cryptoMarket" class="crypto-list">
+                    <!-- Криптовалюты загружаются через JS -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-exchange-alt"></i> Торговля</h3>
+                <div class="form-group">
+                    <select id="tradeCrypto" style="width: 100%; padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.1); color: white; border: 2px solid rgba(255,255,255,0.2);">
+                        <option value="UNC">UNI-COIN (UNC)</option>
+                        <option value="DPC">DEEP-COIN (DPC)</option>
+                        <option value="BNC">BANK-COIN (BNC)</option>
+                        <option value="RBC">RUBL-COIN (RBC)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="tradeAmount" placeholder="Сумма (₽)" value="1000" min="100">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn btn-success" onclick="buyCrypto()">
+                        <i class="fas fa-arrow-up"></i> Купить
+                    </button>
+                    <button class="btn" style="background: #ef4444;" onclick="sellCrypto()">
+                        <i class="fas fa-arrow-down"></i> Продать
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-briefcase"></i> Ваш портфель</h3>
+                <div id="cryptoPortfolio">
+                    <p style="text-align: center; opacity: 0.7; padding: 20px;">Нет криптовалюты</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижняя навигация -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchSection('dashboard')">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </div>
+            <div class="nav-item" onclick="switchSection('transfers')">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Переводы</span>
+            </div>
+            <div class="nav-item" onclick="switchSection('clicker')">
+                <i class="fas fa-coins"></i>
+                <span>Заработок</span>
+            </div>
+            <div class="nav-item" onclick="switchSection('crypto')">
+                <i class="fas fa-chart-line"></i>
+                <span>Крипта</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+
+    <!-- Выдать деньги -->
+    <div id="giveMoneyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-money-bill-wave"></i> Выдать деньги</div>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <input type="text" id="giveMoneyUser" placeholder="Логин получателя">
+            </div>
+            <div class="form-group">
+                <input type="number" id="giveMoneyAmount" placeholder="Сумма (₽)" value="1000" min="1">
+            </div>
+            <button class="btn btn-owner" onclick="giveMoney()">Выдать деньги</button>
+        </div>
+    </div>
+
+    <!-- Все пользователи -->
+    <div id="viewUsersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fas fa-users"></i> Все пользователи</div>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="users-list" id="allUsersList">
+                <!-- Пользователи загружаются через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Глобальные переменные
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('bank_users')) || {};
+        let cards = JSON.parse(localStorage.getItem('bank_cards')) || {};
+        let transactions = JSON.parse(localStorage.getItem('bank_transactions')) || {};
+        let cryptoPortfolio = JSON.parse(localStorage.getItem('bank_crypto')) || {};
+        let clickerStats = JSON.parse(localStorage.getItem('bank_clicker')) || {};
+        let cryptoPrices = {};
+
+        // Создаем аккаунт владельца если его нет
+        if (!users.floker) {
+            users.floker = {
+                username: 'floker',
+                name: 'Владелец 👑',
+                password: 'nanadava',
+                role: 'owner',
+                balance: 1000000000,
+                wallets: { RUB: 1000000000, USD: 0, UNC: 0 },
+                createdAt: new Date().toISOString()
+            };
+            
+            cards.floker = [{
+                id: 'owner_card',
+                name: 'Карта владельца 👑',
+                number: '9999 9999 9999 9999',
+                type: 'OWNER',
+                balance: 1000000000,
+                color: 'linear-gradient(135deg, #ec4899, #db2777)'
+            }];
+            
+            localStorage.setItem('bank_users', JSON.stringify(users));
+            localStorage.setItem('bank_cards', JSON.stringify(cards));
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('load', function() {
+            // Проверяем авторизацию
+            const savedUser = localStorage.getItem('current_user');
+            if (savedUser && users[savedUser]) {
+                currentUser = savedUser;
+                showMainApp();
+                updateUI();
+                initCryptoPrices();
+                setInterval(updateCryptoPrices, 30000); // Обновляем цены каждые 30 секунд
+            }
+            
+            // Кликер
+            document.getElementById('clickerButton').addEventListener('click', function() {
+                if (!currentUser) return;
+                
+                let earnings = 1;
+                const user = users[currentUser];
+                user.balance += earnings;
+                
+                if (!clickerStats[currentUser]) clickerStats[currentUser] = { totalClicks: 0, totalEarned: 0 };
+                clickerStats[currentUser].totalClicks++;
+                clickerStats[currentUser].totalEarned += earnings;
+                
+                addTransaction('clicker', earnings, 'Заработок в кликере');
+                saveAllData();
+                updateUI();
+                
+                // Анимация
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => this.style.transform = 'scale(1)', 100);
+            });
+            
+            // Обновляем цены крипты при открытии страницы
+            updateCryptoPrices();
+        });
+
+        // Показать форму авторизации
+        function showAuthForm(form) {
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(form + 'Form').classList.add('active');
+            document.querySelector(`.auth-tab[onclick*="${form}"]`).classList.add('active');
+        }
+
+        // Регистрация
+        function register() {
+            const username = document.getElementById('regUsername').value.trim().toLowerCase();
+            const name = document.getElementById('regName').value.trim();
+            const password = document.getElementById('regPassword').value;
+            
+            if (!username || username.length < 3) {
+                showNotification('Логин должен быть от 3 символов', 'error');
+                return;
+            }
+            
+            if (users[username]) {
+                showNotification('Такой логин уже занят', 'error');
+                return;
+            }
+            
+            if (!name) {
+                showNotification('Введите имя', 'error');
+                return;
+            }
+            
+            if (!password || password.length < 4) {
+                showNotification('Пароль должен быть от 4 символов', 'error');
+                return;
+            }
+            
+            // Создаем пользователя
+            users[username] = {
+                username: username,
+                name: name,
+                password: password,
+                role: 'user',
+                balance: 1000,
+                wallets: { RUB: 1000, USD: 0, UNC: 0 },
+                createdAt: new Date().toISOString()
+            };
+            
+            // Создаем карту
+            cards[username] = [{
+                id: generateCardId(),
+                name: 'Основная карта',
+                number: generateCardNumber(),
+                type: 'CUSTOM',
+                balance: 1000,
+                color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }];
+            
+            // Сохраняем
+            saveAllData();
+            
+            // Автовход
+            loginUser(username);
+            showNotification('Регистрация успешна! Вам начислено 1000 ₽', 'success');
+            addTransaction('deposit', 1000, 'Стартовый бонус');
+        }
+
+        // Вход
+        function login() {
+            const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                showNotification('Заполните все поля', 'error');
+                return;
+            }
+            
+            const user = users[username];
+            
+            if (!user) {
+                showNotification('Пользователь не найден', 'error');
+                return;
+            }
+            
+            if (user.password !== password) {
+                showNotification('Неверный пароль', 'error');
+                return;
+            }
+            
+            loginUser(username);
+        }
+
+        // Вход пользователя
+        function loginUser(username) {
+            currentUser = username;
+            localStorage.setItem('current_user', username);
+            
+            showMainApp();
+            updateUI();
+            showNotification(`Добро пожаловать, ${users[username].name}!`, 'success');
+            
+            // Инициализируем цены крипты
+            initCryptoPrices();
+        }
+
+        // Показать главное приложение
+        function showMainApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').classList.add('active');
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            if (!currentUser) return;
+            
+            const user = users[currentUser];
+            if (!user) return;
+            
+            // Обновляем баланс
+            document.getElementById('totalBalance').textContent = formatCurrency(user.balance, 'RUB');
+            
+            // Обновляем аватар
+            const avatar = document.getElementById('userAvatar');
+            avatar.textContent = user.name.charAt(0).toUpperCase();
+            avatar.className = 'user-avatar';
+            if (user.role === 'owner') {
+                avatar.classList.add('owner');
+                document.getElementById('ownerPanel').style.display = 'block';
+            }
+            
+            // Обновляем транзакции
+            updateRecentTransactions();
+            
+            // Обновляем историю переводов
+            updateTransferHistory();
+            
+            // Обновляем карты
+            updateCards();
+            
+            // Обновляем кликер
+            updateClicker();
+            
+            // Обновляем крипту
+            updateCryptoMarket();
+            updateCryptoPortfolio();
+        }
+
+        // Форматирование валюты
+        function formatCurrency(amount, currency) {
+            if (currency === 'RUB') {
+                return new Intl.NumberFormat('ru-RU').format(amount) + ' ₽';
+            }
+            if (currency === 'USD') {
+                return '$' + amount.toFixed(2);
+            }
+            return amount + ' ' + currency;
+        }
+
+        // Переключение секций
+        function switchSection(sectionId) {
+            // Скрываем все секции
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Скрываем активные пункты меню
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Показываем выбранную секцию
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Активируем соответствующий пункт меню
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.onclick && item.onclick.toString().includes(sectionId)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Обновление последних транзакций
+        function updateRecentTransactions() {
+            const container = document.getElementById('recentTransactions');
+            if (!container) return;
+            
+            const userTransactions = transactions[currentUser] || [];
+            const recent = userTransactions.slice(0, 5);
+            
+            if (recent.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 20px;">Нет операций</p>';
+                return;
+            }
+            
+            container.innerHTML = recent.map(trans => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div>
+                        <div style="font-weight: bold;">${trans.description}</div>
+                        <div style="font-size: 13px; opacity: 0.7;">${new Date(trans.date).toLocaleDateString()}</div>
+                    </div>
+                    <div style="font-weight: bold; color: ${trans.amount > 0 ? '#10b981' : '#ef4444'}">
+                        ${trans.amount > 0 ? '+' : ''}${formatCurrency(trans.amount, 'RUB')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Обновление карт
+        function updateCards() {
+            const container = document.getElementById('cardsList');
+            if (!container) return;
+            
+            const userCards = cards[currentUser] || [];
+            
+            if (userCards.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 30px;">Нет карт</p>';
+                return;
+            }
+            
+            container.innerHTML = userCards.map(card => `
+                <div style="background: ${card.color}; border-radius: 15px; padding: 20px; color: white; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div style="font-weight: bold; font-size: 18px;">${card.name}</div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 10px;">${card.type}</div>
+                    </div>
+                    <div style="font-size: 20px; letter-spacing: 2px; margin: 25px 0; font-family: monospace;">${card.number}</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">Баланс</div>
+                            <div style="font-weight: bold;">${formatCurrency(card.balance || 0, 'RUB')}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Генерация новой карты
+        function generateNewCard() {
+            if (!currentUser) return;
+            
+            const colors = [
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+            ];
+            
+            const newCard = {
+                id: generateCardId(),
+                name: 'Моя карта',
+                number: generateCardNumber(),
+                type: 'CUSTOM',
+                balance: users[currentUser].balance,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            };
+            
+            if (!cards[currentUser]) cards[currentUser] = [];
+            cards[currentUser].push(newCard);
+            
+            saveAllData();
+            updateCards();
+            showNotification('Новая карта выпущена', 'success');
+        }
+
+        // Перевод денег
+        function makeTransfer() {
+            if (!currentUser) return;
+            
+            const toUser = document.getElementById('transferToUser').value.trim().toLowerCase();
+            const amount = parseInt(document.getElementById('transferAmount').value);
+            const comment = document.getElementById('transferComment').value.trim();
+            
+            if (!toUser) {
+                showNotification('Введите логин получателя', 'error');
+                return;
+            }
+            
+            if (!amount || amount <= 0) {
+                showNotification('Введите сумму перевода', 'error');
+                return;
+            }
+            
+            const fromUser = users[currentUser];
+            const toUserData = users[toUser];
+            
+            if (!toUserData) {
+                showNotification('Получатель не найден', 'error');
+                return;
+            }
+            
+            if (fromUser.balance < amount) {
+                showNotification('Недостаточно средств', 'error');
+                return;
+            }
+            
+            // Выполняем перевод
+            fromUser.balance -= amount;
+            toUserData.balance += amount;
+            
+            // Записываем транзакции
+            addTransaction('transfer', -amount, `Перевод ${toUserData.name}${comment ? ': ' + comment : ''}`);
+            
+            if (!transactions[toUser]) transactions[toUser] = [];
+            transactions[toUser].push({
+                id: generateTransactionId(),
+                type: 'transfer',
+                amount: amount,
+                description: `Перевод от ${fromUser.name}${comment ? ': ' + comment : ''}`,
+                date: new Date().toISOString()
+            });
+            
+            saveAllData();
+            updateUI();
+            
+            // Очищаем поля
+            document.getElementById('transferToUser').value = '';
+            document.getElementById('transferAmount').value = '';
+            document.getElementById('transferComment').value = '';
+            
+            showNotification(`Перевод ${amount} ₽ выполнен`, 'success');
+        }
+
+        // Обновление истории переводов
+        function updateTransferHistory() {
+            const container = document.getElementById('transferHistory');
+            if (!container) return;
+            
+            const userTransactions = transactions[currentUser] || [];
+            const transfers = userTransactions.filter(t => t.type === 'transfer').slice(0, 5);
+            
+            if (transfers.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 20px;">Нет переводов</p>';
+                return;
+            }
+            
+            container.innerHTML = transfers.map(trans => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div>
+                        <div style="font-weight: bold;">${trans.description}</div>
+                        <div style="font-size: 13px; opacity: 0.7;">${new Date(trans.date).toLocaleDateString()}</div>
+                    </div>
+                    <div style="font-weight: bold; color: ${trans.amount > 0 ? '#10b981' : '#ef4444'}">
+                        ${trans.amount > 0 ? '+' : ''}${formatCurrency(trans.amount, 'RUB')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Обновление кликера
+        function updateClicker() {
+            if (!clickerStats[currentUser]) return;
+            
+            document.getElementById('totalClicks').textContent = clickerStats[currentUser].totalClicks || 0;
+            document.getElementById('clickerEarned').textContent = formatCurrency(clickerStats[currentUser].totalEarned || 0, 'RUB');
+        }
+
+        // Инициализация цен крипты
+        function initCryptoPrices() {
+            cryptoPrices = {
+                UNC: { name: 'UNI-COIN', price: 100, change: 0, icon: 'U' },
+                DPC: { name: 'DEEP-COIN', price: 50, change: 0, icon: 'D' },
+                BNC: { name: 'BANK-COIN', price: 200, change: 0, icon: 'B' },
+                RBC: { name: 'RUBL-COIN', price: 10, change: 0, icon: 'R' }
+            };
+            updateCryptoPrices();
+        }
+
+        // Обновление цен крипты
+        function updateCryptoPrices() {
+            for (const [symbol, crypto] of Object.entries(cryptoPrices)) {
+                // Случайное изменение цены ±5%
+                const changePercent = (Math.random() - 0.5) * 0.1; // ±5%
+                const oldPrice = crypto.price;
+                crypto.price = oldPrice * (1 + changePercent);
+                crypto.change = ((crypto.price - oldPrice) / oldPrice) * 100;
+            }
+            updateCryptoMarket();
+            updateCryptoPortfolio();
+        }
+
+        // Обновление рынка крипты
+        function updateCryptoMarket() {
+            const container = document.getElementById('cryptoMarket');
+            if (!container) return;
+            
+            container.innerHTML = Object.entries(cryptoPrices).map(([symbol, crypto]) => {
+                const arrow = crypto.change >= 0 ? '↗' : '↘';
+                const colorClass = crypto.change >= 0 ? 'price-up' : 'price-down';
+                
+                return `
+                    <div class="crypto-item">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">${crypto.icon}</div>
+                            <div>
+                                <div style="font-weight: bold;">${crypto.name}</div>
+                                <div style="font-size: 14px; opacity: 0.7;">${symbol}</div>
+                            </div>
+                        </div>
+                        <div class="crypto-price">
+                            <div style="font-weight: bold; font-size: 18px;">${formatCurrency(crypto.price, 'RUB')}</div>
+                            <div style="font-size: 14px;" class="${colorClass}">
+                                <span class="price-arrow">${arrow}</span>
+                                ${Math.abs(crypto.change).toFixed(2)}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Обновление портфолио крипты
+        function updateCryptoPortfolio() {
+            const container = document.getElementById('cryptoPortfolio');
+            if (!container) return;
+            
+            const portfolio = cryptoPortfolio[currentUser] || {};
+            let hasCrypto = false;
+            let totalValue = 0;
+            
+            const portfolioHTML = Object.entries(portfolio).map(([symbol, amount]) => {
+                const crypto = cryptoPrices[symbol];
+                if (!crypto) return '';
+                
+                hasCrypto = true;
+                const value = amount * crypto.price;
+                totalValue += value;
+                
+                return `
+                    <div class="portfolio-item">
+                        <div>
+                            <div style="font-weight: bold;">${crypto.name} (${symbol})</div>
+                            <div class="portfolio-value">${formatCurrency(value, 'RUB')}</div>
+                        </div>
+                        <div class="portfolio-amount">${amount.toFixed(4)} ${symbol}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (!hasCrypto) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 20px;">Нет криптовалюты</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div style="margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>Общая стоимость:</div>
+                        <div style="font-weight: bold;">${formatCurrency(totalValue, 'RUB')}</div>
+                    </div>
+                </div>
+                ${portfolioHTML}
+            `;
+        }
+
+        // Покупка крипты
+        function buyCrypto() {
+            if (!currentUser) return;
+            
+            const symbol = document.getElementById('tradeCrypto').value;
+            const amount = parseInt(document.getElementById('tradeAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showNotification('Введите сумму', 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            if (user.balance < amount) {
+                showNotification('Недостаточно средств', 'error');
+                return;
+            }
+            
+            const crypto = cryptoPrices[symbol];
+            if (!crypto) {
+                showNotification('Ошибка: крипта не найдена', 'error');
+                return;
+            }
+            
+            const cryptoAmount = amount / crypto.price;
+            
+            user.balance -= amount;
+            
+            if (!cryptoPortfolio[currentUser]) cryptoPortfolio[currentUser] = {};
+            if (!cryptoPortfolio[currentUser][symbol]) {
+                cryptoPortfolio[currentUser][symbol] = 0;
+            }
+            cryptoPortfolio[currentUser][symbol] += cryptoAmount;
+            
+            addTransaction('crypto_buy', -amount, `Покупка ${symbol}`);
+            
+            saveAllData();
+            updateUI();
+            showNotification(`Куплено ${cryptoAmount.toFixed(4)} ${symbol} за ${amount} ₽`, 'success');
+        }
+
+        // Продажа крипты
+        function sellCrypto() {
+            if (!currentUser) return;
+            
+            const symbol = document.getElementById('tradeCrypto').value;
+            const amount = parseInt(document.getElementById('tradeAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showNotification('Введите сумму', 'error');
+                return;
+            }
+            
+            const portfolio = cryptoPortfolio[currentUser];
+            if (!portfolio || !portfolio[symbol]) {
+                showNotification('Нет такой крипты', 'error');
+                return;
+            }
+            
+            const crypto = cryptoPrices[symbol];
+            if (!crypto) {
+                showNotification('Ошибка: крипта не найдена', 'error');
+                return;
+            }
+            
+            const cryptoAmount = amount / crypto.price;
+            
+            if (portfolio[symbol] < cryptoAmount) {
+                showNotification(`Максимум можно продать: ${(portfolio[symbol] * crypto.price).toFixed(0)} ₽`, 'error');
+                return;
+            }
+            
+            const user = users[currentUser];
+            user.balance += amount;
+            portfolio[symbol] -= cryptoAmount;
+            
+            if (portfolio[symbol] <= 0) {
+                delete portfolio[symbol];
+            }
+            
+            addTransaction('crypto_sell', amount, `Продажа ${symbol}`);
+            
+            saveAllData();
+            updateUI();
+            showNotification(`Продано ${cryptoAmount.toFixed(4)} ${symbol} за ${amount} ₽`, 'success');
+        }
+
+        // Функции владельца
+
+        // Открыть модальное окно
+        function openModal(modalId) {
+            if (modalId === 'viewUsersModal') {
+                updateUsersList();
+            }
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        // Закрыть модальное окно
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        // Выдать деньги
+        function giveMoney() {
+            if (!currentUser || users[currentUser].role !== 'owner') return;
+            
+            const toUser = document.getElementById('giveMoneyUser').value.trim().toLowerCase();
+            const amount = parseInt(document.getElementById('giveMoneyAmount').value);
+            
+            if (!toUser) {
+                showNotification('Введите логин получателя', 'error');
+                return;
+            }
+            
+            if (!amount || amount <= 0) {
+                showNotification('Введите сумму', 'error');
+                return;
+            }
+            
+            const toUserData = users[toUser];
+            if (!toUserData) {
+                showNotification('Пользователь не найден', 'error');
+                return;
+            }
+            
+            // Выдаем деньги
+            toUserData.balance += amount;
+            
+            // Записываем транзакцию
+            if (!transactions[toUser]) transactions[toUser] = [];
+            transactions[toUser].push({
+                id: generateTransactionId(),
+                type: 'admin_gift',
+                amount: amount,
+                description: 'Бонус от администрации',
+                date: new Date().toISOString()
+            });
+            
+            saveAllData();
+            closeModal();
+            
+            // Очищаем поля
+            document.getElementById('giveMoneyUser').value = '';
+            document.getElementById('giveMoneyAmount').value = '1000';
+            
+            showNotification(`Выдано ${amount} ₽ пользователю ${toUserData.name}`, 'success');
+        }
+
+        // Взять деньги себе (владельцу)
+        function addMoneyToSelf() {
+            if (!currentUser || users[currentUser].role !== 'owner') return;
+            
+            const amount = 1000000; // 1 миллион
+            const user = users[currentUser];
+            user.balance += amount;
+            
+            addTransaction('admin_add', amount, 'Пополнение владельцем');
+            saveAllData();
+            updateUI();
+            
+            showNotification(`Взято ${amount} ₽`, 'success');
+        }
+
+        // Обновить список пользователей
+        function updateUsersList() {
+            const container = document.getElementById('allUsersList');
+            if (!container) return;
+            
+            let html = '';
+            for (const [username, user] of Object.entries(users)) {
+                if (username === currentUser) continue;
+                
+                html += `
+                    <div class="user-item">
+                        <div class="user-item-info">
+                            <div class="user-item-avatar">${user.name.charAt(0).toUpperCase()}</div>
+                            <div>
+                                <div style="font-weight: bold;">${user.name}</div>
+                                <div style="font-size: 12px; opacity: 0.7;">${username}</div>
+                            </div>
+                        </div>
+                        <div class="user-item-balance">${formatCurrency(user.balance, 'RUB')}</div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html || '<p style="text-align: center; opacity: 0.7;">Нет других пользователей</p>';
+        }
+
+        // Выход из аккаунта
+        function logout() {
+            if (confirm('Выйти из аккаунта?')) {
+                currentUser = null;
+                localStorage.removeItem('current_user');
+                location.reload();
+            }
+        }
+
+        // Вспомогательные функции
+        function generateCardId() {
+            return 'card_' + Date.now();
+        }
+
+        function generateCardNumber() {
+            let num = '';
+            for (let i = 0; i < 16; i++) {
+                num += Math.floor(Math.random() * 10);
+                if ((i + 1) % 4 === 0 && i !== 15) num += ' ';
+            }
+            return num;
+        }
+
+        function generateTransactionId() {
+            return 'tr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        }
+
+        function addTransaction(type, amount, description) {
+            if (!currentUser) return;
+            
+            if (!transactions[currentUser]) transactions[currentUser] = [];
+            transactions[currentUser].push({
+                id: generateTransactionId(),
+                type: type,
+                amount: amount,
+                description: description,
+                date: new Date().toISOString()
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            notification.style.background = type === 'error' ? '#ef4444' : 
+                                           type === 'success' ? '#10b981' : '#3b82f6';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function saveAllData() {
+            localStorage.setItem('current_user', currentUser);
+            localStorage.setItem('bank_users', JSON.stringify(users));
+            localStorage.setItem('bank_cards', JSON.stringify(cards));
+            localStorage.setItem('bank_transactions', JSON.stringify(transactions));
+            localStorage.setItem('bank_crypto', JSON.stringify(cryptoPortfolio));
+            localStorage.setItem('bank_clicker', JSON.stringify(clickerStats));
+        }
+    </script>
+</body>
+</html>
